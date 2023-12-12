@@ -12,8 +12,6 @@ const sidebarList = data.map(({ name, id }) => ({ name, id }));
 const autoSizeStrategy = { type: "fitGridWidth" };
 
 export const Contained = () => {
-  const [searchValue, setSearchValue] = useState("");
-
   const [activeId, setActiveId] = useState(sidebarList[0].id);
 
   const activeDataset = data.find(({ id }) => id === activeId);
@@ -24,24 +22,19 @@ export const Contained = () => {
     <div className="d-flex flex-row gap-3 flex-wrap flex-md-nowrap">
       <Sidebar
         setActiveId={setActiveId}
-        className="flex-fill"
         activeId={activeId}
         list={sidebarList}
       ></Sidebar>
-      <div className="d-flex flex-column gap-3 w-100">
-        <SearchInput
-          setValue={setSearchValue}
-          value={searchValue}
-        ></SearchInput>
-        <div className="ag-theme-quartz" style={{ height: 500 }}>
-          <AgGridReact
-            autoSizeStrategy={autoSizeStrategy}
-            quickFilterText={searchValue}
-            columnDefs={columns}
-            rowData={rows}
-            key={activeId}
-          ></AgGridReact>
-        </div>
+      <div className="d-flex flex-column gap-3">
+        <SearchInput></SearchInput>
+      </div>
+      <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
+        <AgGridReact
+          autoSizeStrategy={autoSizeStrategy}
+          columnDefs={columns}
+          rowData={rows}
+          key={activeId}
+        ></AgGridReact>
       </div>
     </div>
   );

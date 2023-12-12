@@ -23,8 +23,8 @@ export const Contained = () => {
   return (
     <div className="d-flex flex-row gap-3 flex-wrap flex-md-nowrap">
       <Sidebar
+        className="flex-fill border overflow-hidden"
         setActiveId={setActiveId}
-        className="flex-fill"
         activeId={activeId}
         list={sidebarList}
       ></Sidebar>

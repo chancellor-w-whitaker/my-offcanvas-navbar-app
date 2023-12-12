@@ -1,16 +1,12 @@
 import { Fragment } from "react";
 
-export const Sidebar = ({ className = "", setActiveId, activeId, list }) => {
+export const Sidebar = ({ setActiveId, activeId, list }) => {
   const updateActiveId = (id) => setActiveId(id);
 
   const preventNavigation = (e) => e.preventDefault();
 
-  const fullClassName = ["nav nav-pills flex-column mb-auto", className].join(
-    className.length > 0 ? " " : ""
-  );
-
   return (
-    <ul className={fullClassName}>
+    <ul className="nav nav-pills flex-column mb-auto border rounded">
       {list.map(({ name, id }) => {
         const onListItemClick = () => updateActiveId(id);
 

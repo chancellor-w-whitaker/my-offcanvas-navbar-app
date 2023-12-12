@@ -24,19 +24,14 @@ export const Contained = () => {
     <div className="d-flex flex-row gap-3 flex-wrap flex-md-nowrap">
       <Sidebar
         setActiveId={setActiveId}
-        className="flex-fill"
         activeId={activeId}
         list={sidebarList}
       ></Sidebar>
       <div className="d-flex flex-column gap-3 w-100">
-        <SearchInput
-          setValue={setSearchValue}
-          value={searchValue}
-        ></SearchInput>
+        <SearchInput></SearchInput>
         <div className="ag-theme-quartz" style={{ height: 500 }}>
           <AgGridReact
             autoSizeStrategy={autoSizeStrategy}
-            quickFilterText={searchValue}
             columnDefs={columns}
             rowData={rows}
             key={activeId}

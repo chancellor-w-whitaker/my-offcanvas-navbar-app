@@ -5,12 +5,12 @@ export const Sidebar = ({ className = "", setActiveId, activeId, list }) => {
 
   const preventNavigation = (e) => e.preventDefault();
 
-  const fullClassName = ["nav nav-pills flex-column mb-auto", className].join(
-    className.length > 0 ? " " : ""
-  );
-
   return (
-    <ul className={fullClassName}>
+    <ul
+      className={["nav nav-pills flex-column mb-auto", className].join(
+        className.length > 0 ? " " : ""
+      )}
+    >
       {list.map(({ name, id }) => {
         const onListItemClick = () => updateActiveId(id);
 

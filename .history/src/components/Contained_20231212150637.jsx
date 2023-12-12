@@ -36,7 +36,6 @@ export const Contained = () => {
         <div className="ag-theme-quartz" style={{ height: 500 }}>
           <AgGridReact
             autoSizeStrategy={autoSizeStrategy}
-            quickFilterText={searchValue}
             columnDefs={columns}
             rowData={rows}
             key={activeId}
