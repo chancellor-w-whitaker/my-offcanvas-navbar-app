@@ -418,7 +418,3 @@ body {
   vertical-align: -0.125em;
   fill: currentColor;
 }
-
-[class*="ag-theme-"] {
-  font-family: var(--bs-font-sans-serif);
-}

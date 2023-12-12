@@ -1,4 +1,4 @@
-export const MainContainer = () => {
+export const MainContainer = ({ children }) => {
   return (
     <main className="container my-3">
       <div className="d-flex flex-column gap-3">

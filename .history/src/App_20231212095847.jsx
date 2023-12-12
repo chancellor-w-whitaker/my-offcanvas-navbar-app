@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { MainContainer } from "./components/MainContainer";
 import { NavScroller } from "./components/NavScroller";
-import { Contained } from "./components/Contained";
+import { Dashboard } from "./components/Dashboard";
 import { Navbar } from "./components/Navbar";
 import "./App.css";
 
@@ -20,7 +20,7 @@ const App = () => {
       <Navbar></Navbar>
       <NavScroller></NavScroller>
       <MainContainer>
-        <Contained></Contained>
+        <Dashboard></Dashboard>
       </MainContainer>
     </>
   );

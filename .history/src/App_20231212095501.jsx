@@ -2,26 +2,19 @@ import { useEffect } from "react";
 
 import { MainContainer } from "./components/MainContainer";
 import { NavScroller } from "./components/NavScroller";
-import { Contained } from "./components/Contained";
 import { Navbar } from "./components/Navbar";
 import "./App.css";
 
 const App = () => {
   useEffect(() => {
-    document.body.classList.add("bg-body-tertiary");
-
-    return () => {
-      document.body.classList.remove("bg-body-tertiary");
-    };
+    document.body.classList.add("bg-body-secondary");
   }, []);
 
   return (
     <>
       <Navbar></Navbar>
       <NavScroller></NavScroller>
-      <MainContainer>
-        <Contained></Contained>
-      </MainContainer>
+      <MainContainer>Chance</MainContainer>
     </>
   );
 };

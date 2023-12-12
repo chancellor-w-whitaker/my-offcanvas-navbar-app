@@ -422,3 +422,7 @@ body {
 [class*="ag-theme-"] {
   font-family: var(--bs-font-sans-serif);
 }
+
+.ag-root-wrapper-overflow-hidden .ag-root-wrapper {
+  overflow: hidden;
+}
