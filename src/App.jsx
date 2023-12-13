@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 
-import { MainContainer } from "./components/MainContainer";
-import { NavScroller } from "./components/NavScroller";
-import { Contained } from "./components/Contained";
-import { Navbar } from "./components/Navbar";
+import { MainContainer } from "./components/wrapper/MainContainer";
+import { NavScroller } from "./components/wrapper/NavScroller";
+import { Navbar } from "./components/wrapper/Navbar";
 import "./App.css";
 
-const App = () => {
+const App = ({ children }) => {
   useEffect(() => {
     document.body.classList.add("bg-body-tertiary");
 
@@ -19,9 +18,7 @@ const App = () => {
     <>
       <Navbar></Navbar>
       <NavScroller></NavScroller>
-      <MainContainer>
-        <Contained></Contained>
-      </MainContainer>
+      <MainContainer>{children}</MainContainer>
     </>
   );
 };

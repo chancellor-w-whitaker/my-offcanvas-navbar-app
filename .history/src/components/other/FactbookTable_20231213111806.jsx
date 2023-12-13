@@ -1,0 +1,16 @@
+import { useState } from "react";
+
+import { datasets } from "../../constants/datasets";
+import { GridExample } from "./GridExample";
+
+export const FactbookTable = () => {
+  const [activeDatasetId, setActiveDatasetId] = useState(datasets[0].id);
+
+  const activeDataset = datasets.find(({ id }) => id === activeDatasetId);
+
+  return (
+    <div>
+      <GridExample></GridExample>
+    </div>
+  );
+};
