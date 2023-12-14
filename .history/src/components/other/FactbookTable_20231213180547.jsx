@@ -1,7 +1,9 @@
-import { useCallback, Fragment, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 
 import { datasets } from "../../constants/datasets";
+import { useData } from "../../hooks/useData";
 import { GridExample } from "./GridExample";
+import { DatasetMenu } from "./DatasetMenu";
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -16,65 +18,33 @@ import { GridExample } from "./GridExample";
 //    alternatively, when child or inherited components are not littered with business logic, a larger number of props may not appear messy
 
 export const FactbookTable = () => {
-  const [rowsOfData, setRowsOfData] = useState([]);
+  const [isPending, startTransition] = useTransition();
 
   const [activeDatasetId, setActiveDatasetId] = useState(datasets[0].id);
 
   const activeDataset = datasets.find(({ id }) => id === activeDatasetId);
 
-  const gridRowsLocation = activeDataset.location;
+  const fetchUrl = activeDataset.location;
+
+  const rowData = useData(fetchUrl);
+
+  const columnDefs = useMemo(() => {
+    const firstRow =
+      Array.isArray(rowData) && rowData.length > 0 ? rowData[0] : {};
+
+    return Object.keys(firstRow).map((field) => ({ field }));
+  }, [rowData]);
 
   const onDatasetItemClick = useCallback((id) => setActiveDatasetId(id), []);
 
-  const onGridReady = useCallback(() => {
-    fetch(gridRowsLocation)
-      .then((resp) => resp.json())
-      .then((data) => setRowsOfData(data));
-  }, [gridRowsLocation]);
-
   return (
-    <div>
+    <>
       <DatasetMenu
         onDatasetItemClick={onDatasetItemClick}
         activeDatasetId={activeDatasetId}
         datasets={datasets}
       ></DatasetMenu>
-      <GridExample onGridReady={onGridReady}></GridExample>
-    </div>
-  );
-};
-
-const DatasetMenu = ({ onDatasetItemClick, activeDatasetId, datasets }) => {
-  const preventNavigation = (e) => e.preventDefault();
-
-  return (
-    <ul className="nav nav-pills flex-column mb-auto">
-      {datasets.map(({ displayName, id }) => (
-        <Fragment key={id}>
-          {id === activeDatasetId ? (
-            <li onClick={() => onDatasetItemClick(id)} className="nav-item">
-              <a
-                onClick={preventNavigation}
-                className="nav-link active"
-                aria-current="page"
-                href="#"
-              >
-                {displayName}
-              </a>
-            </li>
-          ) : (
-            <li onClick={() => onDatasetItemClick(id)}>
-              <a
-                className="nav-link link-body-emphasis"
-                onClick={preventNavigation}
-                href="#"
-              >
-                {displayName}
-              </a>
-            </li>
-          )}
-        </Fragment>
-      ))}
-    </ul>
+      <GridExample columnDefs={columnDefs} rowData={rowData}></GridExample>
+    </>
   );
 };

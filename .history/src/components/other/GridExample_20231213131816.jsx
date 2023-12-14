@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { useState } from "react";
 
-export const GridExample = () => {
+export const GridExample = (props) => {
   // Row Data: The data to be displayed.
   const [rowData] = useState([
     {
