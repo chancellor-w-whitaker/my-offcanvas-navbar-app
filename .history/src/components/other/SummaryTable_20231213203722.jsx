@@ -27,12 +27,6 @@ export const SummaryTable = () => {
 
   const [rowData, setRowData] = useState();
 
-  // do rows & columns need ids?
-  // selected column ids (or fields)
-  // need a column dropdown component
-  // remember python melt function
-  // can chat gpt handle converting it to js, or should you just do it yourself?
-
   console.log(rowData);
 
   const columnDefs = useMemo(() => {
@@ -46,9 +40,10 @@ export const SummaryTable = () => {
   const fetchLocation = datasets.find(({ id }) => id === activeTabID).location;
 
   const onTabTransitionEnd = useCallback(
-    ({ propertyName }, tabID) => {
+    (e, tabID) => {
+      console.log(e.propertyName);
       const [bgTransOccurred, isNextDatasetTab] = [
-        propertyName === "background-color",
+        e.propertyName === "background-color",
         tabID === activeTabID,
       ];
 

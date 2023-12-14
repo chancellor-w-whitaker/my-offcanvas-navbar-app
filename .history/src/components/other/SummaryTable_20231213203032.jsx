@@ -25,15 +25,7 @@ const initFetchLocation = datasets.find(
 export const SummaryTable = () => {
   const gridRef = useRef();
 
-  const [rowData, setRowData] = useState();
-
-  // do rows & columns need ids?
-  // selected column ids (or fields)
-  // need a column dropdown component
-  // remember python melt function
-  // can chat gpt handle converting it to js, or should you just do it yourself?
-
-  console.log(rowData);
+  const [rowData, setRowData] = useState(null);
 
   const columnDefs = useMemo(() => {
     return Object.keys(

@@ -4,12 +4,6 @@ import { datasets } from "../../constants/datasets";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
-const initActiveTabID = datasets[0].id;
-
-const initFetchLocation = datasets.find(
-  ({ id }) => id === initActiveTabID
-).location;
-
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
 // keep all business logic localized to this one "root" file for now, and then all props passed will have referential equality (when applicable) (safe props)
@@ -22,18 +16,16 @@ const initFetchLocation = datasets.find(
 //  this may be undesirable because it would increase the number of props passed to components
 //    alternatively, when child or inherited components are not littered with business logic, a larger number of props may not appear messy
 
+const initActiveTabID = datasets[0].id;
+
+const initFetchLocation = datasets.find(
+  ({ id }) => id === initActiveTabID
+).location;
+
 export const SummaryTable = () => {
   const gridRef = useRef();
 
-  const [rowData, setRowData] = useState();
-
-  // do rows & columns need ids?
-  // selected column ids (or fields)
-  // need a column dropdown component
-  // remember python melt function
-  // can chat gpt handle converting it to js, or should you just do it yourself?
-
-  console.log(rowData);
+  const [rowData, setRowData] = useState([]);
 
   const columnDefs = useMemo(() => {
     return Object.keys(
