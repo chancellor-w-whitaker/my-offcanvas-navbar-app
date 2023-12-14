@@ -16,55 +16,18 @@ const initFetchLocation = datasets.find(
 
 const initDropdownState = new Set(["termDesc"]);
 
-const groupBy = (rowData, groupByFields, aggFields) => {
-  if (!Array.isArray(rowData) || !Array.isArray(groupByFields)) return rowData;
-
+const groupBy = (rowData, fields) => {
   const legend = {};
 
   rowData.forEach((row) => {
-    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
+    const pairs = fields.map((field) => [field, row[field]]);
 
-    const aggPairs = aggFields.map((field) => [field, row[field]]);
+    let previousRoot = legend;
 
-    let currentRoot = legend;
-
-    groupByPairs.forEach(([field, value]) => {
-      if (!(value in currentRoot)) currentRoot[value] = {};
-
-      currentRoot = currentRoot[value];
-    });
-
-    aggPairs.forEach(([field, value]) => {
-      if (!(field in currentRoot)) currentRoot[field] = 0;
-
-      currentRoot[field] += value;
+    pairs.forEach(([field, value]) => {
+      if (!(value in previousRoot)) previousRoot[value] = {};
     });
   });
-
-  // const iterateRoot = (root) => {
-  //   const array = [];
-
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
-
-  //   recurse(root);
-
-  //   return array;
-  // };
-
-  // const groupedRowData = iterateRoot(legend);
-
-  console.log(legend);
 };
 
 // do bare minimum
@@ -129,15 +92,10 @@ export const SummaryTable = () => {
   );
 
   const groupedRowData = useMemo(() => {
-    const groupByFields = filteredColumnDefs
-      .filter((def) => !("type" in def))
-      .map(({ field }) => field);
-
-    const aggFields = filteredColumnDefs
-      .filter((def) => "type" in def)
-      .map(({ field }) => field);
-
-    return groupBy(rowData, groupByFields, aggFields);
+    groupBy(
+      rowData,
+      filteredColumnDefs.map(({ field }) => field)
+    );
   }, [rowData, filteredColumnDefs]);
 
   const onDropdownItemClick = useCallback((e) => {

@@ -41,30 +41,30 @@ const groupBy = (rowData, groupByFields, aggFields) => {
     });
   });
 
-  // const iterateRoot = (root) => {
-  //   const array = [];
+  const iterateRoot = (root) => {
+    const array = [];
 
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
+    const recurse = (tree, depth = 0, objectToPopulate = {}) =>
+      Object.entries(tree).forEach(([value, innerTree]) => {
+        if (typeof innerTree === "object") {
+          objectToPopulate[groupByFields[depth]] = value;
+          recurse(innerTree, depth + 1, objectToPopulate);
+        } else {
+          aggFields.forEach(
+            (field) => (objectToPopulate[field] = innerTree[field])
+          );
+          array.push(objectToPopulate);
+        }
+      });
 
-  //   recurse(root);
+    recurse(root);
 
-  //   return array;
-  // };
+    return array;
+  };
 
-  // const groupedRowData = iterateRoot(legend);
+  const groupedRowData = iterateRoot(legend);
 
-  console.log(legend);
+  console.log(groupedRowData);
 };
 
 // do bare minimum

@@ -1,10 +1,16 @@
-import { startTransition, useCallback, useState, useMemo, useRef } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 
 import { getEachColumnTypeOccurrences } from "../../functions/getEachColumnTypeOccurrences";
 import { findMostCommonType } from "../../functions/findMostCommonType";
 import { toTitleCase } from "../../functions/toTitleCase";
 import { datasets } from "../../constants/datasets";
-import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
@@ -13,59 +19,6 @@ const initActiveTabID = datasets[0].id;
 const initFetchLocation = datasets.find(
   ({ id }) => id === initActiveTabID
 ).location;
-
-const initDropdownState = new Set(["termDesc"]);
-
-const groupBy = (rowData, groupByFields, aggFields) => {
-  if (!Array.isArray(rowData) || !Array.isArray(groupByFields)) return rowData;
-
-  const legend = {};
-
-  rowData.forEach((row) => {
-    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
-
-    const aggPairs = aggFields.map((field) => [field, row[field]]);
-
-    let currentRoot = legend;
-
-    groupByPairs.forEach(([field, value]) => {
-      if (!(value in currentRoot)) currentRoot[value] = {};
-
-      currentRoot = currentRoot[value];
-    });
-
-    aggPairs.forEach(([field, value]) => {
-      if (!(field in currentRoot)) currentRoot[field] = 0;
-
-      currentRoot[field] += value;
-    });
-  });
-
-  // const iterateRoot = (root) => {
-  //   const array = [];
-
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
-
-  //   recurse(root);
-
-  //   return array;
-  // };
-
-  // const groupedRowData = iterateRoot(legend);
-
-  console.log(legend);
-};
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -84,7 +37,13 @@ export const SummaryTable = () => {
 
   const [rowData, setRowData] = useState();
 
-  const [columnDefs, dropdownOptions] = useMemo(() => {
+  // do rows & columns need ids?
+  // selected column ids (or fields)
+  // need a column dropdown component
+  // remember python melt function
+  // can chat gpt handle converting it to js, or should you just do it yourself?
+
+  const [columnDefs, dropdownOptions, initialDropdownState] = useMemo(() => {
     const eachColTypeOccurrences = getEachColumnTypeOccurrences(rowData);
 
     const typedColDefs = Object.entries(eachColTypeOccurrences).map(
@@ -108,59 +67,13 @@ export const SummaryTable = () => {
     return [sortedColDefs, dropdownOpts, initDropdownState];
   }, [rowData]);
 
-  const onGridReady = useCallback(() => {
-    fetch(initFetchLocation)
-      .then((resp) => resp.json())
-      .then((data) => setRowData(data));
-  }, []);
+  const [dropdownState, setDropdownState] = useState(new Set());
 
-  // do rows & columns need ids?
-  // selected column ids (or fields)
-  // need a column dropdown component
-  // remember python melt function
-  // can chat gpt handle converting it to js, or should you just do it yourself?
-
-  const [dropdownState, setDropdownState] = useState(initDropdownState);
-
-  const filteredColumnDefs = useMemo(
-    () =>
-      columnDefs.filter((def) => dropdownState.has(def.field) || "type" in def),
-    [columnDefs, dropdownState]
-  );
-
-  const groupedRowData = useMemo(() => {
-    const groupByFields = filteredColumnDefs
-      .filter((def) => !("type" in def))
-      .map(({ field }) => field);
-
-    const aggFields = filteredColumnDefs
-      .filter((def) => "type" in def)
-      .map(({ field }) => field);
-
-    return groupBy(rowData, groupByFields, aggFields);
-  }, [rowData, filteredColumnDefs]);
-
-  const onDropdownItemClick = useCallback((e) => {
-    startTransition(() => {
-      setDropdownState((previousState) => {
-        const nextState = new Set(previousState);
-
-        nextState.has(e.target.value)
-          ? nextState.delete(e.target.value)
-          : nextState.add(e.target.value);
-
-        return nextState;
-      });
-    });
-  }, []);
+  useEffect(() => {
+    setDropdownState(initialDropdownState);
+  }, [initialDropdownState]);
 
   const [activeTabID, setActiveTabID] = useState(initActiveTabID);
-
-  const onTabClick = useCallback((id) => {
-    startTransition(() => {
-      setActiveTabID(id);
-    });
-  }, []);
 
   const fetchLocation = datasets.find(({ id }) => id === activeTabID).location;
 
@@ -180,17 +93,50 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
+  const onTabClick = useCallback((id) => {
+    startTransition(() => {
+      setActiveTabID(id);
+    });
+  }, []);
+
+  const onGridReady = useCallback(() => {
+    fetch(initFetchLocation)
+      .then((resp) => resp.json())
+      .then((data) => setRowData(data));
+  }, []);
+
   return (
     <>
       <div className="d-flex flex-column gap-3">
-        <Dropdown
-          onItemClick={onDropdownItemClick}
-          fieldFormatter={toTitleCase}
-          options={dropdownOptions}
-          state={dropdownState}
-        >
-          Columns
-        </Dropdown>
+        <div className="dropdown">
+          <button
+            className="btn btn-secondary dropdown-toggle"
+            data-bs-auto-close="outside"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            type="button"
+          >
+            Columns
+          </button>
+          <ul
+            className="dropdown-menu py-0 shadow-sm overflow-y-scroll"
+            style={{ maxHeight: 200 }}
+          >
+            <div className="list-group list-group-flush">
+              {dropdownOptions.map((field) => (
+                <label className="list-group-item d-flex gap-2" key={field}>
+                  <input
+                    className="form-check-input flex-shrink-0"
+                    checked={dropdownState.has(field)}
+                    type="checkbox"
+                    value={field}
+                  />
+                  <span>{toTitleCase(field)}</span>
+                </label>
+              ))}
+            </div>
+          </ul>
+        </div>
         <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
           <Tabs
             onTabTransitionEnd={onTabTransitionEnd}
@@ -201,8 +147,8 @@ export const SummaryTable = () => {
           ></Tabs>
           <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
             <Grid
-              columnDefs={filteredColumnDefs}
               onGridReady={onGridReady}
+              columnDefs={columnDefs}
               rowData={rowData}
               ref={gridRef}
             ></Grid>

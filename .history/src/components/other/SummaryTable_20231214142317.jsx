@@ -41,30 +41,25 @@ const groupBy = (rowData, groupByFields, aggFields) => {
     });
   });
 
-  // const iterateRoot = (root) => {
-  //   const array = [];
+  rowData.forEach((row) => {
+    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
 
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
+    const aggPairs = aggFields.map((field) => [field, row[field]]);
 
-  //   recurse(root);
+    let currentRoot = legend;
 
-  //   return array;
-  // };
+    groupByPairs.forEach(([field, value]) => {
+      if (!(value in currentRoot)) currentRoot[value] = {};
 
-  // const groupedRowData = iterateRoot(legend);
+      currentRoot = currentRoot[value];
+    });
 
-  console.log(legend);
+    aggPairs.forEach(([field, value]) => {
+      if (!(field in currentRoot)) currentRoot[field] = 0;
+
+      currentRoot[field] += value;
+    });
+  });
 };
 
 // do bare minimum

@@ -22,47 +22,16 @@ const groupBy = (rowData, groupByFields, aggFields) => {
   const legend = {};
 
   rowData.forEach((row) => {
-    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
-
-    const aggPairs = aggFields.map((field) => [field, row[field]]);
+    const pairs = groupByFields.map((field) => [field, row[field]]);
 
     let currentRoot = legend;
 
-    groupByPairs.forEach(([field, value]) => {
+    pairs.forEach(([field, value], index) => {
       if (!(value in currentRoot)) currentRoot[value] = {};
 
       currentRoot = currentRoot[value];
     });
-
-    aggPairs.forEach(([field, value]) => {
-      if (!(field in currentRoot)) currentRoot[field] = 0;
-
-      currentRoot[field] += value;
-    });
   });
-
-  // const iterateRoot = (root) => {
-  //   const array = [];
-
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
-
-  //   recurse(root);
-
-  //   return array;
-  // };
-
-  // const groupedRowData = iterateRoot(legend);
 
   console.log(legend);
 };

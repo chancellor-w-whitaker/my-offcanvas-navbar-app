@@ -41,30 +41,39 @@ const groupBy = (rowData, groupByFields, aggFields) => {
     });
   });
 
-  // const iterateRoot = (root) => {
-  //   const array = [];
+  let currentRoot = legend;
 
-  //   const recurse = (tree, depth = 0, objectToPopulate = {}) =>
-  //     Object.entries(tree).forEach(([value, innerTree]) => {
-  //       if (typeof innerTree === "object") {
-  //         objectToPopulate[groupByFields[depth]] = value;
-  //         recurse(innerTree, depth + 1, objectToPopulate);
-  //       } else {
-  //         aggFields.forEach(
-  //           (field) => (objectToPopulate[field] = innerTree[field])
-  //         );
-  //         array.push(objectToPopulate);
-  //       }
-  //     });
+  const iterateRoot = (root) => {
+    const array = [];
 
-  //   recurse(root);
+    const recurse = (tree, depth = 0, objectToPopulate = {}) =>
+      Object.entries(tree).forEach(([value, innerTree]) => {
+        if (typeof innerTree === "object") {
+          objectToPopulate[groupByFields[depth]] = value;
+          recurse(innerTree, depth + 1, objectToPopulate);
+        }
+      });
+  };
 
-  //   return array;
-  // };
+  rowData.forEach((row) => {
+    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
 
-  // const groupedRowData = iterateRoot(legend);
+    const aggPairs = aggFields.map((field) => [field, row[field]]);
 
-  console.log(legend);
+    let currentRoot = legend;
+
+    groupByPairs.forEach(([field, value]) => {
+      if (!(value in currentRoot)) currentRoot[value] = {};
+
+      currentRoot = currentRoot[value];
+    });
+
+    aggPairs.forEach(([field, value]) => {
+      if (!(field in currentRoot)) currentRoot[field] = 0;
+
+      currentRoot[field] += value;
+    });
+  });
 };
 
 // do bare minimum
