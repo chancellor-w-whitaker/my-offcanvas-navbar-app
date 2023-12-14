@@ -43,7 +43,7 @@ export const SummaryTable = () => {
 
         return type === "number"
           ? {
-              valueFormatter: ({ value }) => Math.round(value).toLocaleString(),
+              valueFormatter: (params, value) => Math.round(value),
               headerName: toTitleCase(field),
               type: "numericColumn",
               field,

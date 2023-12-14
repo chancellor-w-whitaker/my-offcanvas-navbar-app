@@ -4,7 +4,6 @@ import { getEachColumnTypeOccurrences } from "../../functions/getEachColumnTypeO
 import { findMostCommonType } from "../../functions/findMostCommonType";
 import { toTitleCase } from "../../functions/toTitleCase";
 import { datasets } from "../../constants/datasets";
-import { groupBy } from "../../functions/groupBy";
 import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
@@ -41,14 +40,7 @@ export const SummaryTable = () => {
       ([field, typeOccurrences]) => {
         const type = findMostCommonType(typeOccurrences);
 
-        return type === "number"
-          ? {
-              valueFormatter: ({ value }) => Math.round(value).toLocaleString(),
-              headerName: toTitleCase(field),
-              type: "numericColumn",
-              field,
-            }
-          : { headerName: toTitleCase(field), field };
+        return type === "number" ? { type: "numericColumn", field } : { field };
       }
     );
 
@@ -96,6 +88,8 @@ export const SummaryTable = () => {
 
     return groupBy(rowData, groupByFields, aggFields);
   }, [rowData, filteredColumnDefs]);
+
+  console.log(groupedRowData);
 
   const onDropdownItemClick = useCallback((e) => {
     startTransition(() => {
@@ -160,7 +154,7 @@ export const SummaryTable = () => {
             <Grid
               columnDefs={filteredColumnDefs}
               onGridReady={onGridReady}
-              rowData={groupedRowData}
+              rowData={rowData}
               ref={gridRef}
             ></Grid>
           </div>

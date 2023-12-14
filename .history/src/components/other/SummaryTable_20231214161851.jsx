@@ -4,7 +4,6 @@ import { getEachColumnTypeOccurrences } from "../../functions/getEachColumnTypeO
 import { findMostCommonType } from "../../functions/findMostCommonType";
 import { toTitleCase } from "../../functions/toTitleCase";
 import { datasets } from "../../constants/datasets";
-import { groupBy } from "../../functions/groupBy";
 import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
@@ -16,6 +15,43 @@ const initFetchLocation = datasets.find(
 ).location;
 
 const initDropdownState = new Set(["termDesc"]);
+
+const groupBy = (rowData, groupByFields, aggFields) => {
+  if (!Array.isArray(rowData) || !Array.isArray(groupByFields)) return rowData;
+
+  const groupedRowData = [];
+
+  const legend = {};
+
+  rowData.forEach((row) => {
+    const groupByPairs = groupByFields.map((field) => [field, row[field]]);
+
+    const aggPairs = aggFields.map((field) => [field, row[field]]);
+
+    let currentRoot = legend;
+
+    groupByPairs.forEach(([field, value], index) => {
+      if (!(value in currentRoot)) {
+        currentRoot[value] = {};
+        if (index === groupByPairs.length - 1) {
+          groupedRowData.push({ reference: currentRoot });
+        }
+      }
+
+      currentRoot = currentRoot[value];
+    });
+
+    groupByPairs.forEach(([field, value]) => (currentRoot[field] = value));
+
+    aggPairs.forEach(([field, value]) => {
+      if (!(field in currentRoot)) currentRoot[field] = 0;
+
+      currentRoot[field] += value;
+    });
+  });
+
+  return groupedRowData.map(({ reference }) => reference);
+};
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -41,14 +77,7 @@ export const SummaryTable = () => {
       ([field, typeOccurrences]) => {
         const type = findMostCommonType(typeOccurrences);
 
-        return type === "number"
-          ? {
-              valueFormatter: ({ value }) => Math.round(value).toLocaleString(),
-              headerName: toTitleCase(field),
-              type: "numericColumn",
-              field,
-            }
-          : { headerName: toTitleCase(field), field };
+        return type === "number" ? { type: "numericColumn", field } : { field };
       }
     );
 
@@ -96,6 +125,8 @@ export const SummaryTable = () => {
 
     return groupBy(rowData, groupByFields, aggFields);
   }, [rowData, filteredColumnDefs]);
+
+  console.log(groupedRowData);
 
   const onDropdownItemClick = useCallback((e) => {
     startTransition(() => {
@@ -160,7 +191,7 @@ export const SummaryTable = () => {
             <Grid
               columnDefs={filteredColumnDefs}
               onGridReady={onGridReady}
-              rowData={groupedRowData}
+              rowData={rowData}
               ref={gridRef}
             ></Grid>
           </div>

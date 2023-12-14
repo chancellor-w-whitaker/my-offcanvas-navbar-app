@@ -42,13 +42,8 @@ export const SummaryTable = () => {
         const type = findMostCommonType(typeOccurrences);
 
         return type === "number"
-          ? {
-              valueFormatter: ({ value }) => Math.round(value).toLocaleString(),
-              headerName: toTitleCase(field),
-              type: "numericColumn",
-              field,
-            }
-          : { headerName: toTitleCase(field), field };
+          ? { headerName: toTitleCase(field), type: "numericColumn", field }
+          : { field };
       }
     );
 
