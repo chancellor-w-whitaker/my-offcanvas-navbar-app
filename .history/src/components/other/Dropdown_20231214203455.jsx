@@ -1,4 +1,4 @@
-import { DropdownItem } from "./DropdownItem";
+import { memo } from "react";
 
 export const Dropdown = ({
   fieldFormatter,

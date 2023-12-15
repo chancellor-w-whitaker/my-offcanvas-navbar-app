@@ -1,10 +1,10 @@
 import { startTransition, useCallback, useState, useMemo, useRef } from "react";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
+import { DropdownButton, DropdownItem } from "./Dropdown";
 import { toTitleCase } from "../../functions/toTitleCase";
 import { datasets } from "../../constants/datasets";
 import { groupBy } from "../../functions/groupBy";
-import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
@@ -110,17 +110,38 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
+  const [count, setCount] = useState(0);
+
   return (
     <>
       <div className="d-flex flex-column gap-3">
-        <Dropdown
+        <button
+          onClick={() => setCount((c) => c + 1)}
+          className="btn bg-warning"
+          type="button"
+        >
+          {count}
+        </button>
+        {/* <Dropdown
           onItemClick={onDropdownItemClick}
           fieldFormatter={toTitleCase}
           options={dropdownOptions}
           state={dropdownState}
         >
           Columns
-        </Dropdown>
+        </Dropdown> */}
+        <DropdownButton name={"Columns"}>
+          {dropdownOptions.map((field) => (
+            <DropdownItem
+              checked={dropdownState.has(field)}
+              onClick={onDropdownItemClick}
+              field={field}
+              key={field}
+            >
+              {toTitleCase(field)}
+            </DropdownItem>
+          ))}
+        </DropdownButton>
         <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
           <Tabs
             onTabTransitionEnd={onTabTransitionEnd}

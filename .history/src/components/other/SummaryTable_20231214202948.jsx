@@ -110,9 +110,18 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
+  const [count, setCount] = useState(0);
+
   return (
     <>
       <div className="d-flex flex-column gap-3">
+        <button
+          onClick={() => setCount((c) => c + 1)}
+          className="btn bg-warning"
+          type="button"
+        >
+          {count}
+        </button>
         <Dropdown
           onItemClick={onDropdownItemClick}
           fieldFormatter={toTitleCase}

@@ -1,10 +1,10 @@
 import { startTransition, useCallback, useState, useMemo, useRef } from "react";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
+import { DropdownButton, DropdownItem, Dropdown } from "./Dropdown";
 import { toTitleCase } from "../../functions/toTitleCase";
 import { datasets } from "../../constants/datasets";
 import { groupBy } from "../../functions/groupBy";
-import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
@@ -121,6 +121,17 @@ export const SummaryTable = () => {
         >
           Columns
         </Dropdown>
+        <DropdownButton name={"Columns"}>
+          {dropdownOptions.map((field) => (
+            <DropdownItem
+              checked={dropdownState.has(field)}
+              onClick={onDropdownItemClick}
+              field={field}
+            >
+              {toTitleCase(field)}
+            </DropdownItem>
+          ))}
+        </DropdownButton>
         <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
           <Tabs
             onTabTransitionEnd={onTabTransitionEnd}

@@ -8,13 +8,13 @@ import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
-const initialActiveTabID = datasets[0].id;
+const initActiveTabID = datasets[0].id;
 
-const initialFetchLocation = datasets.find(
-  ({ id }) => id === initialActiveTabID
+const initFetchLocation = datasets.find(
+  ({ id }) => id === initActiveTabID
 ).location;
 
-const initialDropdownState = new Set(["termDesc"]);
+const initDropdownState = new Set(["termDesc"]);
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -39,7 +39,7 @@ export const SummaryTable = () => {
   );
 
   const onGridReady = useCallback(() => {
-    fetch(initialFetchLocation)
+    fetch(initFetchLocation)
       .then((resp) => resp.json())
       .then((data) => setRowData(data));
   }, []);
@@ -50,7 +50,7 @@ export const SummaryTable = () => {
   // remember python melt function
   // can chat gpt handle converting it to js, or should you just do it yourself?
 
-  const [dropdownState, setDropdownState] = useState(initialDropdownState);
+  const [dropdownState, setDropdownState] = useState(initDropdownState);
 
   const filteredColumnDefs = useMemo(
     () =>
@@ -84,7 +84,7 @@ export const SummaryTable = () => {
     });
   }, []);
 
-  const [activeTabID, setActiveTabID] = useState(initialActiveTabID);
+  const [activeTabID, setActiveTabID] = useState(initActiveTabID);
 
   const onTabClick = useCallback((id) => {
     startTransition(() => {

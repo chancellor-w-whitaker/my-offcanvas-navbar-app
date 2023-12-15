@@ -1,5 +1,3 @@
-import { DropdownItem } from "./DropdownItem";
-
 export const Dropdown = ({
   fieldFormatter,
   onItemClick,
@@ -24,16 +22,20 @@ export const Dropdown = ({
       >
         <div className="list-group list-group-flush">
           {options.map((field) => (
-            <DropdownItem
-              checked={state.has(field)}
-              onClick={onItemClick}
-              field={field}
-              key={field}
-            >
-              {typeof fieldFormatter === "function"
-                ? fieldFormatter(field)
-                : field}
-            </DropdownItem>
+            <label className="list-group-item d-flex gap-2" key={field}>
+              <input
+                className="form-check-input flex-shrink-0"
+                checked={state.has(field)}
+                onChange={onItemClick}
+                type="checkbox"
+                value={field}
+              />
+              <span>
+                {typeof fieldFormatter === "function"
+                  ? fieldFormatter(field)
+                  : field}
+              </span>
+            </label>
           ))}
         </div>
       </ul>

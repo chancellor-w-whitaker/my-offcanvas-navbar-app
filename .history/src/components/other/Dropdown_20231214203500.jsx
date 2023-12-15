@@ -1,5 +1,3 @@
-import { DropdownItem } from "./DropdownItem";
-
 export const Dropdown = ({
   fieldFormatter,
   onItemClick,
