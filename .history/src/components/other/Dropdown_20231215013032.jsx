@@ -1,3 +1,5 @@
+import { DropdownItem } from "./DropdownItem";
+
 export const Dropdown = ({
   fieldFormatter,
   onItemClick,
@@ -8,7 +10,7 @@ export const Dropdown = ({
   return (
     <div className="dropdown">
       <button
-        className="btn btn-secondary dropdown-toggle shadow-sm"
+        className="btn btn-secondary dropdown-toggle"
         data-bs-auto-close="outside"
         data-bs-toggle="dropdown"
         aria-expanded="false"

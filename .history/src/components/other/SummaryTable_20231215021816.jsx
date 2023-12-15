@@ -20,29 +20,7 @@ const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
 
-// want to auto-size from width change & row data update
-// when width changes, given width is always correct
-// when row data updates, given width is not always correct
-// can you cause width to change right off the bat?
-// how can you be sure the given width is accurate when row data updates?
-const autoSize = (e) => {
-  const adjustColWidths = (totalWidth) => {
-    const widthDividedEqually =
-      totalWidth / e.api.columnModel.columnDefs.length;
-
-    if (widthDividedEqually < 100) {
-      e.api.autoSizeAllColumns();
-    } else {
-      e.api.sizeColumnsToFit();
-    }
-  };
-
-  if (e.type === "gridSizeChanged") {
-    adjustColWidths(e.clientWidth);
-  } else {
-    // adjustColWidths(e.api.columnModel.bodyWidth);
-  }
-};
+const onRowDataUpdated = ({ api }) => api.sizeColumnsToFit();
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -72,6 +50,8 @@ export const SummaryTable = () => {
   const [dropdownState, setDropdownState] = useState(initDropdownState);
 
   const [activeTabID, setActiveTabID] = useState("");
+
+  console.log(rowData);
 
   // ! derived values
   const [columnDefs, dropdownOptions] = useMemo(
@@ -161,9 +141,9 @@ export const SummaryTable = () => {
           ></Tabs>
           <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
             <Grid
+              onGridSizeChanged={onRowDataUpdated}
+              onRowDataUpdated={onRowDataUpdated}
               columnDefs={filteredColumnDefs}
-              onGridSizeChanged={autoSize}
-              // onRowDataUpdated={autoSize}
               rowData={groupedRowData}
               ref={gridRef}
             ></Grid>

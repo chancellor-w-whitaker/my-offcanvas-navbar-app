@@ -20,28 +20,21 @@ const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
 
-// want to auto-size from width change & row data update
-// when width changes, given width is always correct
-// when row data updates, given width is not always correct
-// can you cause width to change right off the bat?
-// how can you be sure the given width is accurate when row data updates?
 const autoSize = (e) => {
-  const adjustColWidths = (totalWidth) => {
-    const widthDividedEqually =
-      totalWidth / e.api.columnModel.columnDefs.length;
+  const divideWidthEqually = (totalWidth) =>
+    totalWidth / e.api.columnModel.columnDefs.length;
+
+  if (e.type === "gridSizeChanged") {
+    const widthDividedEqually = divideWidthEqually(e.clientWidth);
 
     if (widthDividedEqually < 100) {
       e.api.autoSizeAllColumns();
     } else {
       e.api.sizeColumnsToFit();
     }
-  };
-
-  if (e.type === "gridSizeChanged") {
-    adjustColWidths(e.clientWidth);
-  } else {
-    // adjustColWidths(e.api.columnModel.bodyWidth);
   }
+
+  if (e.api.columnModel.bodyWidthDirty) return;
 };
 
 // do bare minimum

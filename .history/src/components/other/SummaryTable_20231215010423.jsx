@@ -1,11 +1,4 @@
-import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-} from "react";
+import { startTransition, useCallback, useState, useMemo, useRef } from "react";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";
@@ -16,33 +9,13 @@ import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
-const initActiveTabID = datasets[0].id;
+const initialActiveTabID = datasets[0].id;
 
-const initDropdownState = new Set(["termDesc"]);
+const initialFetchLocation = datasets.find(
+  ({ id }) => id === initialActiveTabID
+).location;
 
-// want to auto-size from width change & row data update
-// when width changes, given width is always correct
-// when row data updates, given width is not always correct
-// can you cause width to change right off the bat?
-// how can you be sure the given width is accurate when row data updates?
-const autoSize = (e) => {
-  const adjustColWidths = (totalWidth) => {
-    const widthDividedEqually =
-      totalWidth / e.api.columnModel.columnDefs.length;
-
-    if (widthDividedEqually < 100) {
-      e.api.autoSizeAllColumns();
-    } else {
-      e.api.sizeColumnsToFit();
-    }
-  };
-
-  if (e.type === "gridSizeChanged") {
-    adjustColWidths(e.clientWidth);
-  } else {
-    // adjustColWidths(e.api.columnModel.bodyWidth);
-  }
-};
+const initialDropdownState = new Set(["termDesc"]);
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
@@ -56,28 +29,28 @@ const autoSize = (e) => {
 //  this may be undesirable because it would increase the number of props passed to components
 //    alternatively, when child or inherited components are not littered with business logic, a larger number of props may not appear messy
 
-// do rows & columns need ids?
-// selected column ids (or fields)
-// need a column dropdown component
-// remember python melt function
-// can chat gpt handle converting it to js, or should you just do it yourself?
-
 export const SummaryTable = () => {
-  // ! refs
   const gridRef = useRef();
 
-  // ! state
   const [rowData, setRowData] = useState();
 
-  const [dropdownState, setDropdownState] = useState(initDropdownState);
-
-  const [activeTabID, setActiveTabID] = useState("");
-
-  // ! derived values
   const [columnDefs, dropdownOptions] = useMemo(
     () => initializeColumnLogic(rowData),
     [rowData]
   );
+
+  const onGridReady = useCallback(
+    () => fetchData(initialFetchLocation, setRowData),
+    []
+  );
+
+  // do rows & columns need ids?
+  // selected column ids (or fields)
+  // need a column dropdown component
+  // remember python melt function
+  // can chat gpt handle converting it to js, or should you just do it yourself?
+
+  const [dropdownState, setDropdownState] = useState(initialDropdownState);
 
   const filteredColumnDefs = useMemo(
     () =>
@@ -97,9 +70,6 @@ export const SummaryTable = () => {
     return groupBy(rowData, groupByFields, aggFields);
   }, [rowData, filteredColumnDefs]);
 
-  const fetchLocation = datasets.find(({ id }) => id === activeTabID)?.location;
-
-  // ! callbacks
   const onDropdownItemClick = useCallback(
     (e) =>
       startTransition(() =>
@@ -116,10 +86,14 @@ export const SummaryTable = () => {
     []
   );
 
+  const [activeTabID, setActiveTabID] = useState(initialActiveTabID);
+
   const onTabClick = useCallback(
     (id) => startTransition(() => setActiveTabID(id)),
     []
   );
+
+  const fetchLocation = datasets.find(({ id }) => id === activeTabID).location;
 
   const onTabTransitionEnd = useCallback(
     ({ propertyName }, tabID) => {
@@ -135,11 +109,6 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
-  // ! effects
-  useEffect(() => {
-    setActiveTabID(initActiveTabID);
-  }, []);
-
   return (
     <>
       <div className="d-flex flex-column gap-3">
@@ -153,8 +122,8 @@ export const SummaryTable = () => {
         </Dropdown>
         <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
           <Tabs
-            className="flex-fill text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
+            className="flex-fill text-nowrap"
             activeTabID={activeTabID}
             onTabClick={onTabClick}
             list={datasets}
@@ -162,8 +131,7 @@ export const SummaryTable = () => {
           <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
             <Grid
               columnDefs={filteredColumnDefs}
-              onGridSizeChanged={autoSize}
-              // onRowDataUpdated={autoSize}
+              onGridReady={onGridReady}
               rowData={groupedRowData}
               ref={gridRef}
             ></Grid>

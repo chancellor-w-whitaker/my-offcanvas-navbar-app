@@ -1,3 +1,5 @@
+import { DropdownItem } from "./DropdownItem";
+
 export const Dropdown = ({
   fieldFormatter,
   onItemClick,
@@ -8,7 +10,7 @@ export const Dropdown = ({
   return (
     <div className="dropdown">
       <button
-        className="btn btn-secondary dropdown-toggle shadow-sm"
+        className="btn btn-secondary dropdown-toggle"
         data-bs-auto-close="outside"
         data-bs-toggle="dropdown"
         aria-expanded="false"
@@ -22,13 +24,14 @@ export const Dropdown = ({
       >
         <div className="list-group list-group-flush">
           {options.map((field) => (
-            <label className="list-group-item d-flex gap-2" key={field}>
+            <label className="list-group-item d-flex gap-2">
               <input
                 className="form-check-input flex-shrink-0"
                 checked={state.has(field)}
                 onChange={onItemClick}
                 type="checkbox"
                 value={field}
+                key={field}
               />
               <span>
                 {typeof fieldFormatter === "function"
