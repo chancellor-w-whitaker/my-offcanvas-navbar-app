@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+// import useResizeObserver from "use-resize-observer";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";
@@ -19,16 +20,6 @@ import { Grid } from "./Grid";
 const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
-
-const onGridSizeChanged = ({ clientWidth, api }) => {
-  const widthDividedEqually = clientWidth / api.columnModel.columnDefs.length;
-
-  if (widthDividedEqually < 125) {
-    api.autoSizeAllColumns();
-  } else {
-    api.sizeColumnsToFit();
-  }
-};
 
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality

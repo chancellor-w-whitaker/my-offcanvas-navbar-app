@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+// import useResizeObserver from "use-resize-observer";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";
@@ -51,6 +52,9 @@ const onGridSizeChanged = ({ clientWidth, api }) => {
 export const SummaryTable = () => {
   // ! refs
   const gridRef = useRef();
+
+  // const { width: gridContainerWidth = 1, ref: gridContainerRef } =
+  //   useResizeObserver();
 
   // ! state
   const [rowData, setRowData] = useState();
@@ -148,6 +152,7 @@ export const SummaryTable = () => {
           <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
             <Grid
               onGridSizeChanged={onGridSizeChanged}
+              // onRowDataUpdated={adjustColWidths}
               columnDefs={filteredColumnDefs}
               rowData={groupedRowData}
               ref={gridRef}

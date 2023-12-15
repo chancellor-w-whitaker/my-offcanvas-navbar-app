@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+// import useResizeObserver from "use-resize-observer";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";

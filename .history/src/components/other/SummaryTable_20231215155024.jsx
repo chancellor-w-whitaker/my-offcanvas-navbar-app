@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";
@@ -20,13 +21,39 @@ const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
 
-const onGridSizeChanged = ({ clientWidth, api }) => {
-  const widthDividedEqually = clientWidth / api.columnModel.columnDefs.length;
+// want to auto-size from width change & row data update
+// when width changes, given width is always correct
+// when row data updates, given width is not always correct
+// can you cause width to change right off the bat?
+// how can you be sure the given width is accurate when row data updates?
+const autoSize = (e) => {
+  const adjustColWidths = (totalWidth) => {
+    const widthDividedEqually =
+      totalWidth / e.api.columnModel.columnDefs.length;
 
-  if (widthDividedEqually < 125) {
-    api.autoSizeAllColumns();
+    if (widthDividedEqually < 100) {
+      e.api.autoSizeAllColumns();
+    } else {
+      e.api.sizeColumnsToFit();
+    }
+  };
+
+  if (e.type === "gridSizeChanged") {
+    adjustColWidths(e.clientWidth);
   } else {
-    api.sizeColumnsToFit();
+    // adjustColWidths(e.api.columnModel.bodyWidth);
+  }
+};
+
+const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
+
+const adjustColWidths = (totalWidth, numberOfColumns, gridRef) => {
+  const widthDividedEqually = totalWidth / numberOfColumns;
+
+  if (widthDividedEqually < 100) {
+    gridRef.current.api.sizeColumnsToFit();
+  } else {
+    gridRef.current.api.sizeColumnsToFit();
   }
 };
 
@@ -51,6 +78,9 @@ const onGridSizeChanged = ({ clientWidth, api }) => {
 export const SummaryTable = () => {
   // ! refs
   const gridRef = useRef();
+
+  const { width: gridContainerWidth = 1, ref: gridContainerRef } =
+    useResizeObserver();
 
   // ! state
   const [rowData, setRowData] = useState();
@@ -121,6 +151,16 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
+  const adjustColWidths = useCallback(() => {
+    const widthDividedEqually = gridContainerWidth / filteredColumnDefs.length;
+
+    if (widthDividedEqually < 100) {
+      gridRef.current.api.autoSizeAllColumns();
+    } else {
+      gridRef.current.api.sizeColumnsToFit();
+    }
+  }, [gridContainerWidth, filteredColumnDefs]);
+
   // ! effects
   useEffect(() => {
     setActiveTabID(initActiveTabID);
@@ -145,9 +185,14 @@ export const SummaryTable = () => {
             onTabClick={onTabClick}
             list={datasets}
           ></Tabs>
-          <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
+          <div
+            className="ag-theme-quartz w-100"
+            style={{ height: 500 }}
+            ref={gridContainerRef}
+          >
             <Grid
-              onGridSizeChanged={onGridSizeChanged}
+              // onGridSizeChanged={sizeColumnsToFit}
+              onRowDataUpdated={sizeColumnsToFit}
               columnDefs={filteredColumnDefs}
               rowData={groupedRowData}
               ref={gridRef}

@@ -20,16 +20,6 @@ const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
 
-const onGridSizeChanged = ({ clientWidth, api }) => {
-  const widthDividedEqually = clientWidth / api.columnModel.columnDefs.length;
-
-  if (widthDividedEqually < 125) {
-    api.autoSizeAllColumns();
-  } else {
-    api.sizeColumnsToFit();
-  }
-};
-
 // do bare minimum
 // ensure reactive values in body of component maintain referential equality
 // keep all business logic localized to this one "root" file for now, and then all props passed will have referential equality (when applicable) (safe props)
