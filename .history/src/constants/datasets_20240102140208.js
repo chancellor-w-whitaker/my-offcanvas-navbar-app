@@ -2,7 +2,7 @@ export const datasets = [
   {
     location: "data/factbook/fall-enrollment.json",
     displayName: "Fall Enrollment",
-    pivotColumn: "termDesc",
+    pivotField: "termDesc",
     id: "fall-enrollment",
   },
   {
@@ -38,7 +38,7 @@ export const datasets = [
   {
     location: "data/factbook/credit-hours.json",
     displayName: "Credit Hours",
-    pivotColumn: "year",
     id: "credit-hours",
+    pivotColumn: "",
   },
 ];

@@ -25,11 +25,11 @@ export const initializeColumnLogic = (rowData) => {
     (object) => !("type" in object)
   );
 
+  // ! need to find pivotValues from rowData and then generate pivotColumnDefs
+
   const numericColumnDefs = typedColumnDefs.filter(
     (object) => "type" in object
   );
-
-  // ! need to find pivotValues from rowData and then generate pivotColumnDefs
 
   // ! should add pivotColumnDefs instead of numericColumnDefs
   const sortedColumnDefs = [...nonNumericColumnDefs, ...numericColumnDefs];
@@ -42,10 +42,6 @@ export const initializeColumnLogic = (rowData) => {
   }));
 
   const initialSummaryColumns = new Set([allSummaryColumns[0]]);
-
-  // ! outside of this file (& hook), for compatibility with groupBy function, for each row, add row[row[pivotColumn]] = row[measure] (make sure to deep copy rows to prevent awkward behavior)
-  // ! for each row, do you also need to add a 0 for every other pivotValue?
-  // ! continue re-naming due to application purpose & requirements changing
 
   return {
     columnDefs: sortedColumnDefs,

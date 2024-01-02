@@ -66,15 +66,15 @@ export const SummaryTable = () => {
   // ! derived values
   const dataset = datasets.find(({ id }) => id === datasetID);
 
-  const datasetFetchUrl = dataset?.location;
+  const fetchLocation = dataset?.location;
 
-  const pivotColumn = dataset?.pivotColumn;
+  const pivotField = dataset?.pivotField;
 
   // const pivotValues = useMemo(() => {
   //   const set = new Set();
 
   //   rows?.forEach((row) => {
-  //     const pivotValue = row[pivotColumn];
+  //     const pivotValue = row[pivotField];
 
   //     const measureValue = row[measure];
 
@@ -84,9 +84,9 @@ export const SummaryTable = () => {
   //   });
 
   //   return [...set];
-  // }, [rows, pivotColumn, measure]);
+  // }, [rows, pivotField, measure]);
 
-  const { allSummaryColumns, allMeasures, columnDefs } = useMemo(
+  const { dropdownOptions, measuresList, columnDefs } = useMemo(
     () => initializeColumnLogic(rows),
     [rows]
   );
@@ -140,11 +140,9 @@ export const SummaryTable = () => {
         tabID === datasetID,
       ];
 
-      bgTransOccurred &&
-        isNextDatasetTab &&
-        fetchData(datasetFetchUrl, setRows);
+      bgTransOccurred && isNextDatasetTab && fetchData(fetchLocation, setRows);
     },
-    [datasetID, datasetFetchUrl]
+    [datasetID, fetchLocation]
   );
 
   const onMeasureTabClick = useCallback(
@@ -158,18 +156,18 @@ export const SummaryTable = () => {
   }, []);
 
   useEffect(() => {
-    const allMeasuresIsPopulated =
-      Array.isArray(allMeasures) &&
-      allMeasures.length > 0 &&
-      "id" in allMeasures[0];
+    const measuresListIsPopulated =
+      Array.isArray(measuresList) &&
+      measuresList.length > 0 &&
+      "id" in measuresList[0];
 
-    allMeasuresIsPopulated && setMeasure(allMeasures[0].id);
-  }, [allMeasures]);
+    measuresListIsPopulated && setMeasure(measuresList[0].id);
+  }, [measuresList]);
 
   // console.log(
   //   rows?.map((row) => ({
   //     ...row,
-  //     [row[pivotColumn]]: row[measure],
+  //     [row[pivotField]]: row[measure],
   //   }))
   // );
 
@@ -189,12 +187,12 @@ export const SummaryTable = () => {
             onTabClick={onMeasureTabClick}
             // onTabTransitionEnd={onTabTransitionEnd}
             activeTabID={measure}
-            list={allMeasures}
+            list={measuresList}
           ></Tabs>
           <Dropdown
             onItemClick={onDropdownItemClick}
             fieldFormatter={toTitleCase}
-            options={allSummaryColumns}
+            options={dropdownOptions}
             state={summaryColumns}
           >
             Columns

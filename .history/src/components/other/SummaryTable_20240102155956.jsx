@@ -18,7 +18,7 @@ import { Grid } from "./Grid";
 
 const initActiveTabID = datasets[0].id;
 
-const initialSummaryColumns = new Set(["termDesc"]);
+const initDropdownState = new Set(["termDesc"]);
 
 const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
 
@@ -55,48 +55,40 @@ export const SummaryTable = () => {
   const gridRef = useRef();
 
   // ! state
-  const [rows, setRows] = useState();
+  const [rowData, setRowData] = useState();
 
-  const [summaryColumns, setSummaryColumns] = useState(initialSummaryColumns);
+  const [dropdownState, setDropdownState] = useState(initDropdownState);
 
-  const [datasetID, setDatasetID] = useState("");
+  const [activeTabID, setActiveTabID] = useState("");
 
-  const [measure, setMeasure] = useState("");
+  const [activeMeasure, setActiveMeasure] = useState("");
 
   // ! derived values
-  const dataset = datasets.find(({ id }) => id === datasetID);
+  const activeDataset = datasets.find(({ id }) => id === activeTabID);
 
-  const datasetFetchUrl = dataset?.location;
+  const fetchLocation = activeDataset?.location;
 
-  const pivotColumn = dataset?.pivotColumn;
+  const pivotField = activeDataset?.pivotField;
 
-  // const pivotValues = useMemo(() => {
-  //   const set = new Set();
+  const pivotValues = useMemo(() => {
+    const set = new Set();
 
-  //   rows?.forEach((row) => {
-  //     const pivotValue = row[pivotColumn];
+    rowData.forEach((row) => set.add(row[pivotField]));
 
-  //     const measureValue = row[measure];
+    return [...set];
+  }, []);
 
-  //     set.add(pivotValue);
-
-  //     row[pivotValue] = measureValue;
-  //   });
-
-  //   return [...set];
-  // }, [rows, pivotColumn, measure]);
-
-  const { allSummaryColumns, allMeasures, columnDefs } = useMemo(
-    () => initializeColumnLogic(rows),
-    [rows]
+  const { dropdownOptions, measuresList, columnDefs } = useMemo(
+    () => initializeColumnLogic(rowData),
+    [rowData]
   );
 
   const filteredColumnDefs = useMemo(
     () =>
       columnDefs.filter(
-        ({ field }) => summaryColumns.has(field) || field === measure
+        ({ field }) => dropdownState.has(field) || field === activeMeasure
       ),
-    [columnDefs, summaryColumns, measure]
+    [columnDefs, dropdownState, activeMeasure]
   );
 
   const groupedRowData = useMemo(() => {
@@ -108,14 +100,14 @@ export const SummaryTable = () => {
       .filter((def) => "type" in def)
       .map(({ field }) => field);
 
-    return groupBy(rows, groupByFields, aggFields);
-  }, [rows, filteredColumnDefs]);
+    return groupBy(rowData, groupByFields, aggFields);
+  }, [rowData, filteredColumnDefs]);
 
   // ! callbacks
   const onDropdownItemClick = useCallback(
     (e) =>
       startTransition(() =>
-        setSummaryColumns((previousState) => {
+        setDropdownState((previousState) => {
           const nextState = new Set(previousState);
 
           nextState.has(e.target.value)
@@ -129,7 +121,7 @@ export const SummaryTable = () => {
   );
 
   const onTabClick = useCallback(
-    (id) => startTransition(() => setDatasetID(id)),
+    (id) => startTransition(() => setActiveTabID(id)),
     []
   );
 
@@ -137,41 +129,41 @@ export const SummaryTable = () => {
     ({ propertyName }, tabID) => {
       const [bgTransOccurred, isNextDatasetTab] = [
         propertyName === "background-color",
-        tabID === datasetID,
+        tabID === activeTabID,
       ];
 
       bgTransOccurred &&
         isNextDatasetTab &&
-        fetchData(datasetFetchUrl, setRows);
+        fetchData(fetchLocation, setRowData);
     },
-    [datasetID, datasetFetchUrl]
+    [activeTabID, fetchLocation]
   );
 
   const onMeasureTabClick = useCallback(
-    (id) => startTransition(() => setMeasure(id)),
+    (id) => startTransition(() => setActiveMeasure(id)),
     []
   );
 
   // ! effects
   useEffect(() => {
-    setDatasetID(initActiveTabID);
+    setActiveTabID(initActiveTabID);
   }, []);
 
   useEffect(() => {
-    const allMeasuresIsPopulated =
-      Array.isArray(allMeasures) &&
-      allMeasures.length > 0 &&
-      "id" in allMeasures[0];
+    const measuresListIsPopulated =
+      Array.isArray(measuresList) &&
+      measuresList.length > 0 &&
+      "id" in measuresList[0];
 
-    allMeasuresIsPopulated && setMeasure(allMeasures[0].id);
-  }, [allMeasures]);
+    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
+  }, [measuresList]);
 
-  // console.log(
-  //   rows?.map((row) => ({
-  //     ...row,
-  //     [row[pivotColumn]]: row[measure],
-  //   }))
-  // );
+  console.log(
+    rowData?.map((row) => ({
+      ...row,
+      [row[pivotField]]: row[activeMeasure],
+    }))
+  );
 
   return (
     <>
@@ -180,22 +172,22 @@ export const SummaryTable = () => {
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
+            activeTabID={activeTabID}
             onTabClick={onTabClick}
-            activeTabID={datasetID}
             list={datasets}
           ></Tabs>
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabClick={onMeasureTabClick}
             // onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={measure}
-            list={allMeasures}
+            activeTabID={activeMeasure}
+            list={measuresList}
           ></Tabs>
           <Dropdown
             onItemClick={onDropdownItemClick}
             fieldFormatter={toTitleCase}
-            options={allSummaryColumns}
-            state={summaryColumns}
+            options={dropdownOptions}
+            state={dropdownState}
           >
             Columns
           </Dropdown>
