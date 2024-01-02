@@ -147,7 +147,7 @@ export const SummaryTable = () => {
   return (
     <>
       <div className="d-flex flex-wrap flex-lg-nowrap gap-3 align-items-stretch">
-        <div className="d-flex flex-row flex-lg-column gap-3 flex-wrap rounded shadow-sm p-3 flex-fill">
+        <div className="d-flex flex-row flex-lg-column align-items-start gap-3 flex-wrap rounded shadow-sm p-3 pb-auto">
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
@@ -170,7 +170,6 @@ export const SummaryTable = () => {
           >
             Columns
           </Dropdown>
-          <div className="flex-fill"></div>
         </div>
         <div className="ag-theme-quartz w-100" style={{ minHeight: 500 }}>
           <Grid

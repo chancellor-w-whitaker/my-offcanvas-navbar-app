@@ -10,14 +10,19 @@ export const Tabs = ({
   return (
     <ul
       className={[
-        "nav nav-pills flex-column flex-nowrap mb-auto",
+        "nav nav-pills flex-column flex-nowrap mb-auto overflow-y-scroll",
         className,
       ].join(className.length > 0 ? " " : "")}
+      style={{ height: 200 }}
     >
       {list.map(({ displayName, id }) => (
         <Fragment key={id}>
           {id === activeTabID ? (
-            <li onClick={() => onTabClick(id)} className="nav-item">
+            <li
+              style={{ insetInlineStart: 0 }}
+              onClick={() => onTabClick(id)}
+              className="nav-item"
+            >
               <a
                 onTransitionEnd={(e) =>
                   typeof onTabTransitionEnd === "function" &&

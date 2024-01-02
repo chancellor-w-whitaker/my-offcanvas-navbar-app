@@ -147,7 +147,7 @@ export const SummaryTable = () => {
   return (
     <>
       <div className="d-flex flex-wrap flex-lg-nowrap gap-3 align-items-stretch">
-        <div className="d-flex flex-row flex-lg-column gap-3 flex-wrap rounded shadow-sm p-3 flex-fill">
+        <div className="d-flex flex-row flex-lg-column gap-3 flex-wrap rounded shadow-sm p-3">
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
