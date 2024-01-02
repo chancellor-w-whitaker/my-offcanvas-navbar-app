@@ -29,7 +29,7 @@ export const initializeColumnLogic = (rowData) => {
   const dropdownOpts = stringCols.map(({ field }) => field);
 
   const measuresList = numberCols.map(({ field }) => ({
-    displayName: toTitleCase(field),
+    displayName: field,
     id: field,
   }));
 

@@ -64,7 +64,7 @@ export const SummaryTable = () => {
   const [activeMeasure, setActiveMeasure] = useState("");
 
   // ! derived values
-  const { dropdownOptions, measuresList, columnDefs } = useMemo(
+  const { dropdownOptions, measureOptions, columnDefs } = useMemo(
     () => initializeColumnLogic(rowData),
     [rowData]
   );
@@ -125,60 +125,48 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
-  const onMeasureTabClick = useCallback(
-    (id) => startTransition(() => setActiveMeasure(id)),
-    []
-  );
-
   // ! effects
   useEffect(() => {
     setActiveTabID(initActiveTabID);
   }, []);
 
-  useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
-      measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
-  }, [measuresList]);
-
   return (
     <>
-      <div className="d-flex flex-wrap flex-lg-nowrap gap-3 align-items-stretch">
-        <div className="d-flex flex-row flex-lg-column justify-content-start gap-3 flex-wrap rounded shadow-sm p-3 mb-auto">
-          <Tabs
-            className="text-nowrap shadow-sm rounded"
-            onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={activeTabID}
-            onTabClick={onTabClick}
-            list={datasets}
-          ></Tabs>
-          <Tabs
-            className="text-nowrap shadow-sm rounded"
-            onTabClick={onMeasureTabClick}
-            // onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={activeMeasure}
-            list={measuresList}
-          ></Tabs>
-          <Dropdown
-            onItemClick={onDropdownItemClick}
-            fieldFormatter={toTitleCase}
-            options={dropdownOptions}
-            state={dropdownState}
-          >
-            Columns
-          </Dropdown>
-        </div>
-        <div className="ag-theme-quartz w-100" style={{ minHeight: 500 }}>
-          <Grid
-            onGridSizeChanged={sizeColumnsToFit}
-            onRowDataUpdated={sizeColumnsToFit}
-            columnDefs={filteredColumnDefs}
-            rowData={groupedRowData}
-            ref={gridRef}
-          ></Grid>
+      <div className="d-flex flex-column gap-3">
+        <Dropdown
+          onItemClick={onDropdownItemClick}
+          fieldFormatter={toTitleCase}
+          options={dropdownOptions}
+          state={dropdownState}
+        >
+          Columns
+        </Dropdown>
+        <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
+          <div className="d-flex flex-column gap-3">
+            <Tabs
+              className="flex-fill text-nowrap shadow-sm rounded"
+              onTabTransitionEnd={onTabTransitionEnd}
+              activeTabID={activeTabID}
+              onTabClick={onTabClick}
+              list={datasets}
+            ></Tabs>
+            <Tabs
+              className="flex-fill text-nowrap shadow-sm rounded"
+              // onTabTransitionEnd={onTabTransitionEnd}
+              // activeTabID={activeTabID}
+              // onTabClick={onTabClick}
+              list={measureOptions}
+            ></Tabs>
+          </div>
+          <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
+            <Grid
+              onGridSizeChanged={sizeColumnsToFit}
+              onRowDataUpdated={sizeColumnsToFit}
+              columnDefs={filteredColumnDefs}
+              rowData={groupedRowData}
+              ref={gridRef}
+            ></Grid>
+          </div>
         </div>
       </div>
     </>

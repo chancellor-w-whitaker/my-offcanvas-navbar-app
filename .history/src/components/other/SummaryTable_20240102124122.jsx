@@ -136,18 +136,24 @@ export const SummaryTable = () => {
   }, []);
 
   useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
+    Array.isArray(measuresList) &&
       measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
+      "id" in measuresList[0] &&
+      setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
   return (
     <>
-      <div className="d-flex flex-wrap flex-lg-nowrap gap-3 align-items-stretch">
-        <div className="d-flex flex-row flex-lg-column justify-content-start gap-3 flex-wrap rounded shadow-sm p-3 mb-auto">
+      <div className="d-flex gap-3" style={{ height: 500 }}>
+        <div className="d-flex flex-column gap-3">
+          <Dropdown
+            onItemClick={onDropdownItemClick}
+            fieldFormatter={toTitleCase}
+            options={dropdownOptions}
+            state={dropdownState}
+          >
+            Columns
+          </Dropdown>
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
@@ -162,16 +168,8 @@ export const SummaryTable = () => {
             activeTabID={activeMeasure}
             list={measuresList}
           ></Tabs>
-          <Dropdown
-            onItemClick={onDropdownItemClick}
-            fieldFormatter={toTitleCase}
-            options={dropdownOptions}
-            state={dropdownState}
-          >
-            Columns
-          </Dropdown>
         </div>
-        <div className="ag-theme-quartz w-100" style={{ minHeight: 500 }}>
+        <div className="ag-theme-quartz flex-fill">
           <Grid
             onGridSizeChanged={sizeColumnsToFit}
             onRowDataUpdated={sizeColumnsToFit}

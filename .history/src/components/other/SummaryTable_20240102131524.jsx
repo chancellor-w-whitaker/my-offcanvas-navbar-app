@@ -136,12 +136,10 @@ export const SummaryTable = () => {
   }, []);
 
   useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
+    Array.isArray(measuresList) &&
       measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
+      "id" in measuresList[0] &&
+      setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
   return (
@@ -171,7 +169,7 @@ export const SummaryTable = () => {
             Columns
           </Dropdown>
         </div>
-        <div className="ag-theme-quartz w-100" style={{ minHeight: 500 }}>
+        <div className="ag-theme-quartz w-100" style={{ height: 500 }}>
           <Grid
             onGridSizeChanged={sizeColumnsToFit}
             onRowDataUpdated={sizeColumnsToFit}

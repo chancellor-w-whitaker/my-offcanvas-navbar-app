@@ -10,7 +10,7 @@ export const Tabs = ({
   return (
     <ul
       className={[
-        "nav nav-pills flex-column flex-nowrap mb-auto overflow-y-scroll",
+        "nav nav-pills flex-column mb-auto overflow-y-scroll",
         className,
       ].join(className.length > 0 ? " " : "")}
       style={{ height: 200 }}

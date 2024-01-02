@@ -9,11 +9,9 @@ export const Tabs = ({
 }) => {
   return (
     <ul
-      className={[
-        "nav nav-pills flex-column flex-nowrap mb-auto overflow-y-scroll",
-        className,
-      ].join(className.length > 0 ? " " : "")}
-      style={{ height: 200 }}
+      className={["nav nav-pills flex-column mb-auto", className].join(
+        className.length > 0 ? " " : ""
+      )}
     >
       {list.map(({ displayName, id }) => (
         <Fragment key={id}>
@@ -35,10 +33,7 @@ export const Tabs = ({
           ) : (
             <li onClick={() => onTabClick(id)}>
               <a
-                onTransitionEnd={(e) =>
-                  typeof onTabTransitionEnd === "function" &&
-                  onTabTransitionEnd(e, id)
-                }
+                onTransitionEnd={(e) => onTabTransitionEnd(e, id)}
                 className="nav-link link-body-emphasis"
                 onClick={(e) => e.preventDefault()}
                 href="#"

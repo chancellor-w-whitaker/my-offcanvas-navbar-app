@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { initializeColumnLogic } from "../../functions/initializeColumnLogic";
 import { toTitleCase } from "../../functions/toTitleCase";
@@ -20,9 +21,7 @@ const initActiveTabID = datasets[0].id;
 
 const initDropdownState = new Set(["termDesc"]);
 
-const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
-
-const onGridSizeChanged = ({ clientWidth, api }) => {
+const adjustColWidths = ({ clientWidth, api }) => {
   const widthDividedEqually = clientWidth / api.columnModel.columnDefs.length;
 
   if (widthDividedEqually < 125) {
@@ -54,6 +53,9 @@ export const SummaryTable = () => {
   // ! refs
   const gridRef = useRef();
 
+  const { width: gridContainerWidth = 1, ref: gridContainerRef } =
+    useResizeObserver();
+
   // ! state
   const [rowData, setRowData] = useState();
 
@@ -61,10 +63,8 @@ export const SummaryTable = () => {
 
   const [activeTabID, setActiveTabID] = useState("");
 
-  const [activeMeasure, setActiveMeasure] = useState("");
-
   // ! derived values
-  const { dropdownOptions, measuresList, columnDefs } = useMemo(
+  const [columnDefs, dropdownOptions] = useMemo(
     () => initializeColumnLogic(rowData),
     [rowData]
   );
@@ -125,9 +125,20 @@ export const SummaryTable = () => {
     [activeTabID, fetchLocation]
   );
 
-  const onMeasureTabClick = useCallback(
-    (id) => startTransition(() => setActiveMeasure(id)),
-    []
+  const adjustColWidths = useCallback(
+    (e) => {
+      const width =
+        e.type === "onGridSizeChanged" ? e.clientWidth : gridContainerWidth;
+
+      const widthDividedEqually = width / e.api.columnModel.columnDefs.length;
+
+      if (widthDividedEqually < 100) {
+        e.api.autoSizeAllColumns();
+      } else {
+        e.api.sizeColumnsToFit();
+      }
+    },
+    [gridContainerWidth]
   );
 
   // ! effects
@@ -135,50 +146,38 @@ export const SummaryTable = () => {
     setActiveTabID(initActiveTabID);
   }, []);
 
-  useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
-      measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
-  }, [measuresList]);
-
   return (
     <>
-      <div className="d-flex flex-wrap flex-lg-nowrap gap-3 align-items-stretch">
-        <div className="d-flex flex-row flex-lg-column justify-content-start gap-3 flex-wrap rounded shadow-sm p-3 mb-auto">
+      <div className="d-flex flex-column gap-3">
+        <Dropdown
+          onItemClick={onDropdownItemClick}
+          fieldFormatter={toTitleCase}
+          options={dropdownOptions}
+          state={dropdownState}
+        >
+          Columns
+        </Dropdown>
+        <div className="d-flex gap-3 flex-wrap flex-lg-nowrap">
           <Tabs
-            className="text-nowrap shadow-sm rounded"
+            className="flex-fill text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
             activeTabID={activeTabID}
             onTabClick={onTabClick}
             list={datasets}
           ></Tabs>
-          <Tabs
-            className="text-nowrap shadow-sm rounded"
-            onTabClick={onMeasureTabClick}
-            // onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={activeMeasure}
-            list={measuresList}
-          ></Tabs>
-          <Dropdown
-            onItemClick={onDropdownItemClick}
-            fieldFormatter={toTitleCase}
-            options={dropdownOptions}
-            state={dropdownState}
+          <div
+            className="ag-theme-quartz w-100"
+            style={{ height: 500 }}
+            ref={gridContainerRef}
           >
-            Columns
-          </Dropdown>
-        </div>
-        <div className="ag-theme-quartz w-100" style={{ minHeight: 500 }}>
-          <Grid
-            onGridSizeChanged={sizeColumnsToFit}
-            onRowDataUpdated={sizeColumnsToFit}
-            columnDefs={filteredColumnDefs}
-            rowData={groupedRowData}
-            ref={gridRef}
-          ></Grid>
+            <Grid
+              onGridSizeChanged={adjustColWidths}
+              onRowDataUpdated={adjustColWidths}
+              columnDefs={filteredColumnDefs}
+              rowData={groupedRowData}
+              ref={gridRef}
+            ></Grid>
+          </div>
         </div>
       </div>
     </>

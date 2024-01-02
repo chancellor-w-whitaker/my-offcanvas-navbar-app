@@ -6,7 +6,7 @@ export const Dropdown = ({
   state,
 }) => {
   return (
-    <div className="dropdown">
+    <div className="dropdown d-flex">
       <button
         className="btn btn-secondary dropdown-toggle shadow-sm w-100"
         data-bs-auto-close="outside"

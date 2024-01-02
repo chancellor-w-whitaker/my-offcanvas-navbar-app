@@ -140,7 +140,6 @@ export const SummaryTable = () => {
       Array.isArray(measuresList) &&
       measuresList.length > 0 &&
       "id" in measuresList[0];
-
     measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
