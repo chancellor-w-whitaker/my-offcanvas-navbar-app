@@ -190,10 +190,6 @@ export const SummaryTable = () => {
     measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
-  useEffect(() => {
-    setActiveSummaryColumns(initialActiveSummaryColumns);
-  }, [initialActiveSummaryColumns]);
-
   // console.log(
   //   dataRows?.map((row) => ({
   //     ...row,

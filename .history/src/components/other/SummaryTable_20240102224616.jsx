@@ -16,7 +16,9 @@ import { Dropdown } from "./Dropdown";
 import { Tabs } from "./Tabs";
 import { Grid } from "./Grid";
 
-const initActiveDatasetID = datasets[0].id;
+const initActiveTabID = datasets[0].id;
+
+const initialSummaryColumns = new Set(["termDesc"]);
 
 const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
 
@@ -42,7 +44,7 @@ const onGridSizeChanged = ({ clientWidth, api }) => {
 //  this may be undesirable because it would increase the number of props passed to components
 //    alternatively, when child or inherited components are not littered with business logic, a larger number of props may not appear messy
 
-// do dataRows & columns need ids?
+// do rows & columns need ids?
 // selected column ids (or fields)
 // need a column dropdown component
 // remember python melt function
@@ -53,84 +55,51 @@ export const SummaryTable = () => {
   const gridRef = useRef();
 
   // ! state
-  const [dataRows, setDataRows] = useState();
+  const [rows, setRows] = useState();
 
-  const [activeSummaryColumns, setActiveSummaryColumns] = useState(new Set());
+  const [summaryColumns, setSummaryColumns] = useState(initialSummaryColumns);
 
-  const [activeDatasetID, setActiveDatasetID] = useState("");
+  const [datasetID, setDatasetID] = useState("");
 
-  const [activeMeasure, setActiveMeasure] = useState("");
+  const [measure, setMeasure] = useState("");
 
   // ! derived values
-  const currentDataset = datasets.find(({ id }) => id === activeDatasetID);
+  const dataset = datasets.find(({ id }) => id === datasetID);
 
-  const datasetFetchUrl = currentDataset?.location;
+  const datasetFetchUrl = dataset?.location;
 
-  const currentPivotColumn = currentDataset?.pivotColumn;
+  const pivotColumn = dataset?.pivotColumn;
 
-  const {
-    initialActiveSummaryColumns,
-    summaryColumnsList,
-    pivotValuesSet,
-    measuresList,
-    columnDefs,
-  } = useMemo(
-    () => initializeColumnLogic(dataRows, currentPivotColumn),
-    [dataRows, currentPivotColumn]
+  const { allSummaryColumns, allMeasures, pivotValues, columnDefs } = useMemo(
+    () => initializeColumnLogic(rows, pivotColumn),
+    [rows, pivotColumn]
   );
 
-  const activeColumnDefs = useMemo(
+  const filteredColumnDefs = useMemo(
     () =>
       columnDefs.filter(
-        ({ field }) =>
-          activeSummaryColumns.has(field) || pivotValuesSet.has(field)
+        ({ field }) => summaryColumns.has(field) || field === measure
       ),
-    [columnDefs, activeSummaryColumns, pivotValuesSet]
+    [columnDefs, summaryColumns, measure]
   );
 
-  // ! need to create pivot-ready data rows
-  const pivotReadyDataRows = useMemo(() => {
-    if (!Array.isArray(dataRows)) return [];
-
-    return dataRows.map((row) => {
-      const newRow = { ...row };
-
-      const pivotValue = row[currentPivotColumn];
-
-      const measureValue = row[activeMeasure];
-
-      pivotValuesSet.forEach((pivValue) => (newRow[pivValue] = 0));
-
-      newRow[pivotValue] = measureValue;
-
-      return newRow;
-    });
-
-    // return !Array.isArray(dataRows)
-    //   ? []
-    //   : dataRows.map((row) => ({
-    //       ...row,
-    //       [row[currentPivotColumn]]: row[activeMeasure],
-    //     }));
-  }, [dataRows, activeMeasure, currentPivotColumn, pivotValuesSet]);
-
-  const pivotedDataRows = useMemo(() => {
-    const groupByFields = activeColumnDefs
+  const groupedRowData = useMemo(() => {
+    const groupByFields = filteredColumnDefs
       .filter((def) => !("type" in def))
       .map(({ field }) => field);
 
-    const aggFields = activeColumnDefs
+    const aggFields = filteredColumnDefs
       .filter((def) => "type" in def)
       .map(({ field }) => field);
 
-    return groupBy(pivotReadyDataRows, groupByFields, aggFields);
-  }, [pivotReadyDataRows, activeColumnDefs]);
+    return groupBy(rows, groupByFields, aggFields);
+  }, [rows, filteredColumnDefs]);
 
   // ! callbacks
   const onDropdownItemClick = useCallback(
     (e) =>
       startTransition(() =>
-        setActiveSummaryColumns((previousState) => {
+        setSummaryColumns((previousState) => {
           const nextState = new Set(previousState);
 
           nextState.has(e.target.value)
@@ -144,60 +113,47 @@ export const SummaryTable = () => {
   );
 
   const onTabClick = useCallback(
-    (id) => startTransition(() => setActiveDatasetID(id)),
+    (id) => startTransition(() => setDatasetID(id)),
     []
   );
 
   const onTabTransitionEnd = useCallback(
     ({ propertyName }, tabID) => {
-      const [bgTransitionOccurred, isTabOfNextDataset] = [
+      const [bgTransOccurred, isNextDatasetTab] = [
         propertyName === "background-color",
-        tabID === activeDatasetID,
+        tabID === datasetID,
       ];
 
-      bgTransitionOccurred &&
-        isTabOfNextDataset &&
-        fetchData(datasetFetchUrl, setDataRows);
+      bgTransOccurred &&
+        isNextDatasetTab &&
+        fetchData(datasetFetchUrl, setRows);
     },
-    [activeDatasetID, datasetFetchUrl]
+    [datasetID, datasetFetchUrl]
   );
 
   const onMeasureTabClick = useCallback(
-    (id) => startTransition(() => setActiveMeasure(id)),
+    (id) => startTransition(() => setMeasure(id)),
     []
   );
 
   // ! effects
   useEffect(() => {
-    setActiveDatasetID(initActiveDatasetID);
+    setDatasetID(initActiveTabID);
   }, []);
 
   useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
-      measuresList.length > 0 &&
-      "id" in measuresList[0];
+    const allMeasuresIsPopulated =
+      Array.isArray(allMeasures) &&
+      allMeasures.length > 0 &&
+      "id" in allMeasures[0];
 
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
-  }, [measuresList]);
-
-  useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
-      measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
-  }, [measuresList]);
-
-  useEffect(() => {
-    setActiveSummaryColumns(initialActiveSummaryColumns);
-  }, [initialActiveSummaryColumns]);
+    allMeasuresIsPopulated && setMeasure(allMeasures[0].id);
+  }, [allMeasures]);
 
   // console.log(
-  //   dataRows?.map((row) => ({
+  //   rows?.map((row) => ({
   //     ...row,
-  //     [row[currentPivotColumn]]: row[activeMeasure],
+  //     [row[pivotColumn]]: row[measure],
   //   }))
   // );
 
@@ -208,22 +164,22 @@ export const SummaryTable = () => {
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={activeDatasetID}
             onTabClick={onTabClick}
+            activeTabID={datasetID}
             list={datasets}
           ></Tabs>
           <Tabs
             className="text-nowrap shadow-sm rounded"
             onTabClick={onMeasureTabClick}
             // onTabTransitionEnd={onTabTransitionEnd}
-            activeTabID={activeMeasure}
-            list={measuresList}
+            activeTabID={measure}
+            list={allMeasures}
           ></Tabs>
           <Dropdown
             onItemClick={onDropdownItemClick}
             fieldFormatter={toTitleCase}
-            state={activeSummaryColumns}
-            options={summaryColumnsList}
+            options={allSummaryColumns}
+            state={summaryColumns}
           >
             Columns
           </Dropdown>
@@ -233,8 +189,8 @@ export const SummaryTable = () => {
           <Grid
             onGridSizeChanged={sizeColumnsToFit}
             onRowDataUpdated={sizeColumnsToFit}
-            columnDefs={activeColumnDefs}
-            rowData={pivotedDataRows}
+            columnDefs={filteredColumnDefs}
+            rowData={groupedRowData}
             ref={gridRef}
           ></Grid>
         </div>

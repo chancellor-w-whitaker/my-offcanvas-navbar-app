@@ -2,8 +2,8 @@ import { getEachColumnTypeOccurrences } from "./getEachColumnTypeOccurrences";
 import { findMostCommonType } from "./findMostCommonType";
 import { toTitleCase } from "./toTitleCase";
 
-export const initializeColumnLogic = (dataRows, pivotColumn) => {
-  const eachColTypeOccurrences = getEachColumnTypeOccurrences(dataRows);
+export const initializeColumnLogic = (rows, pivotColumn) => {
+  const eachColTypeOccurrences = getEachColumnTypeOccurrences(rows);
 
   // ! filters out pivot column
   const typedColumnDefs = Object.entries(eachColTypeOccurrences)
@@ -31,8 +31,7 @@ export const initializeColumnLogic = (dataRows, pivotColumn) => {
 
   const pivotValuesSet = new Set();
 
-  Array.isArray(dataRows) &&
-    dataRows.forEach((row) => pivotValuesSet.add(row[pivotColumn]));
+  rows.forEach((row) => pivotValuesSet.add(row[pivotColumn]));
 
   // ! model of numeric column def found in typedColumnDefs assignment
   const pivotColumnDefs = [...pivotValuesSet].map((field) => ({
@@ -53,7 +52,7 @@ export const initializeColumnLogic = (dataRows, pivotColumn) => {
 
   const initialActiveSummaryColumns = new Set([summaryColumnsList[0]]);
 
-  // ! outside of this file (& hook), for compatibility with groupBy function, for each row, add row[row[pivotColumn]] = row[measure] (make sure to deep copy dataRows to prevent awkward behavior)
+  // ! outside of this file (& hook), for compatibility with groupBy function, for each row, add row[row[pivotColumn]] = row[measure] (make sure to deep copy rows to prevent awkward behavior)
   // ! for each row, do you also need to add a 0 for every other pivotValue?
   // ! continue re-naming due to application purpose & requirements changing
 

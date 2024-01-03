@@ -18,6 +18,8 @@ import { Grid } from "./Grid";
 
 const initActiveDatasetID = datasets[0].id;
 
+const initActiveSummaryColumns = new Set(["termDesc"]);
+
 const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
 
 const onGridSizeChanged = ({ clientWidth, api }) => {
@@ -55,7 +57,9 @@ export const SummaryTable = () => {
   // ! state
   const [dataRows, setDataRows] = useState();
 
-  const [activeSummaryColumns, setActiveSummaryColumns] = useState(new Set());
+  const [activeSummaryColumns, setActiveSummaryColumns] = useState(
+    initActiveSummaryColumns
+  );
 
   const [activeDatasetID, setActiveDatasetID] = useState("");
 
@@ -68,16 +72,11 @@ export const SummaryTable = () => {
 
   const currentPivotColumn = currentDataset?.pivotColumn;
 
-  const {
-    initialActiveSummaryColumns,
-    summaryColumnsList,
-    pivotValuesSet,
-    measuresList,
-    columnDefs,
-  } = useMemo(
-    () => initializeColumnLogic(dataRows, currentPivotColumn),
-    [dataRows, currentPivotColumn]
-  );
+  const { summaryColumnsList, pivotValuesSet, measuresList, columnDefs } =
+    useMemo(
+      () => initializeColumnLogic(dataRows, currentPivotColumn),
+      [dataRows, currentPivotColumn]
+    );
 
   const activeColumnDefs = useMemo(
     () =>
@@ -89,32 +88,16 @@ export const SummaryTable = () => {
   );
 
   // ! need to create pivot-ready data rows
-  const pivotReadyDataRows = useMemo(() => {
-    if (!Array.isArray(dataRows)) return [];
+  const pivotReadyDataRows = useMemo(
+    () =>
+      dataRows.map((row) => ({
+        ...row,
+        [row[currentPivotColumn]]: row[activeMeasure],
+      })),
+    [dataRows, activeMeasure, currentPivotColumn]
+  );
 
-    return dataRows.map((row) => {
-      const newRow = { ...row };
-
-      const pivotValue = row[currentPivotColumn];
-
-      const measureValue = row[activeMeasure];
-
-      pivotValuesSet.forEach((pivValue) => (newRow[pivValue] = 0));
-
-      newRow[pivotValue] = measureValue;
-
-      return newRow;
-    });
-
-    // return !Array.isArray(dataRows)
-    //   ? []
-    //   : dataRows.map((row) => ({
-    //       ...row,
-    //       [row[currentPivotColumn]]: row[activeMeasure],
-    //     }));
-  }, [dataRows, activeMeasure, currentPivotColumn, pivotValuesSet]);
-
-  const pivotedDataRows = useMemo(() => {
+  const groupedDataRows = useMemo(() => {
     const groupByFields = activeColumnDefs
       .filter((def) => !("type" in def))
       .map(({ field }) => field);
@@ -181,19 +164,6 @@ export const SummaryTable = () => {
     measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
-  useEffect(() => {
-    const measuresListIsPopulated =
-      Array.isArray(measuresList) &&
-      measuresList.length > 0 &&
-      "id" in measuresList[0];
-
-    measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
-  }, [measuresList]);
-
-  useEffect(() => {
-    setActiveSummaryColumns(initialActiveSummaryColumns);
-  }, [initialActiveSummaryColumns]);
-
   // console.log(
   //   dataRows?.map((row) => ({
   //     ...row,
@@ -234,7 +204,7 @@ export const SummaryTable = () => {
             onGridSizeChanged={sizeColumnsToFit}
             onRowDataUpdated={sizeColumnsToFit}
             columnDefs={activeColumnDefs}
-            rowData={pivotedDataRows}
+            rowData={groupedDataRows}
             ref={gridRef}
           ></Grid>
         </div>

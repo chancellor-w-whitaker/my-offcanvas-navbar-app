@@ -18,6 +18,8 @@ import { Grid } from "./Grid";
 
 const initActiveDatasetID = datasets[0].id;
 
+const initActiveSummaryColumns = new Set(["termDesc"]);
+
 const sizeColumnsToFit = ({ api }) => api.sizeColumnsToFit();
 
 const onGridSizeChanged = ({ clientWidth, api }) => {
@@ -55,7 +57,9 @@ export const SummaryTable = () => {
   // ! state
   const [dataRows, setDataRows] = useState();
 
-  const [activeSummaryColumns, setActiveSummaryColumns] = useState(new Set());
+  const [activeSummaryColumns, setActiveSummaryColumns] = useState(
+    initActiveSummaryColumns
+  );
 
   const [activeDatasetID, setActiveDatasetID] = useState("");
 
@@ -68,16 +72,11 @@ export const SummaryTable = () => {
 
   const currentPivotColumn = currentDataset?.pivotColumn;
 
-  const {
-    initialActiveSummaryColumns,
-    summaryColumnsList,
-    pivotValuesSet,
-    measuresList,
-    columnDefs,
-  } = useMemo(
-    () => initializeColumnLogic(dataRows, currentPivotColumn),
-    [dataRows, currentPivotColumn]
-  );
+  const { summaryColumnsList, pivotValuesSet, measuresList, columnDefs } =
+    useMemo(
+      () => initializeColumnLogic(dataRows, currentPivotColumn),
+      [dataRows, currentPivotColumn]
+    );
 
   const activeColumnDefs = useMemo(
     () =>
@@ -189,10 +188,6 @@ export const SummaryTable = () => {
 
     measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
-
-  useEffect(() => {
-    setActiveSummaryColumns(initialActiveSummaryColumns);
-  }, [initialActiveSummaryColumns]);
 
   // console.log(
   //   dataRows?.map((row) => ({

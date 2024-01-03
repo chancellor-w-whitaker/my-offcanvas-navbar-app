@@ -190,6 +190,7 @@ export const SummaryTable = () => {
     measuresListIsPopulated && setActiveMeasure(measuresList[0].id);
   }, [measuresList]);
 
+  // reset
   useEffect(() => {
     setActiveSummaryColumns(initialActiveSummaryColumns);
   }, [initialActiveSummaryColumns]);
